@@ -13,7 +13,7 @@ sapply(tgpp, class)
 tgpp[c(1, 5, 8), c(3, 7, 10)]
 #Question 5
 ?plot
-plot(1:length(tgpp$scale), tgpp$richness, xlab = "Scale", ylab = "Richness", col="darkorange2") 
-plot(1:length(tgpp$scale), tgpp$richness, xlab = "Scale", ylab = "Richness", col="darkorange2", log='xy') 
+plot(tgpp$scale), tgpp$richness, xlab = "Scale", ylab = "Richness", col="darkorange2") 
+plot(tgpp$scale), tgpp$richness, xlab = "Scale", ylab = "Richness", col="darkorange2", log='xy') 
 
 # Log plot Question: The plot is log transformed, and the data points are more linear. 
