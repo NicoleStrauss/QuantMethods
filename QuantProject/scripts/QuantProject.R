@@ -6,7 +6,8 @@ install.packages('devtools')
 library(devtools)
 install.packages(c('bindrcpp','glue','pkgconfig','tibble','plyr','dplyr'))
 library(dplyr)
-install_github('MoBiodiv/mobr')
+devtools::install_dev("remotes")
+remotes::install_github('MoBiodiv/mobr')
 library(readr)
 library(dplyr)
 
@@ -15,6 +16,11 @@ env <- read.csv('./data/Master_env_file.csv')
 
 comm_mod <-  read.csv('./data/comm_mod.csv')
 comm_hx <- read.csv('./data/comm_hx.csv')
+
+comm_mod = as.matrix(comm_mod)
+comm_mod = ifelse(is.na(comm_mod), 0, comm_mod)
+comm_hx = as.matrix(comm_hx)
+comm_hx = ifelse(is.na(comm_hx), 0, comm_hx)
 
 str(env)
 class(env)
@@ -37,6 +43,10 @@ round(PCA_hx$CA$eig / PCA_hx$tot.chi, 2)
 plot(PCA_hx)
 biplot(PCA_hx)
 
+PCA_hx$CA$eig
+scores(PCA_hx)
+
+round(PCA_hx$CA$eig/sum(PCA_hx$CA$eig),2)
 
 #PCA analysis - modern
 str(water_mod)
@@ -55,6 +65,11 @@ PCA_mod$CA$eig
 round(PCA_mod$CA$eig / PCA_mod$tot.chi, 2)
 plot(PCA_mod)
 biplot(PCA_mod)
+
+PCA_mod$CA$eig
+scores(PCA_mod)
+
+round(PCA_mod$CA$eig/sum(PCA_mod$CA$eig),2)
 
 #Spatial analysis hx
 env_xy <- env %>% select(X, Y)
@@ -252,5 +267,69 @@ comm_mantel_both
 #Running spatial analysis with both datasets reveals a more significant spatial signal. The observed value is only slightly 
 #greater than what would be expected, so it is still a weak correlation.
 
-# mobR analysis 
+# mobR analysis hx
+   hx_mob <- make_mob_in(comm_hx, env, coord_names=c("Y","X"))
+hx_mob
 
+#Fire frequency and measures of diversity, hx
+hx_stats_ff <- get_mob_stats(hx_mob, group_var = "ff_91_00")
+plot(hx_stats_ff, 'S')
+plot(hx_stats_ff, 'N')
+plot(hx_stats_ff, 'S_n')
+
+#Year since burn and diversity, hx
+hx_stats_ysb <- get_mob_stats(hx_mob, group_var = "YSB_00")
+plot(hx_stats_ysb, 'S')
+plot(hx_stats_ysb, 'N')
+plot(hx_stats_ysb, 'S_n')
+
+#SAR had the greatest effect in the PCA for hx data 
+hx_stats_sar <- get_mob_stats(hx_mob, group_var = "SAR")
+plot(hx_stats_sar, 'S')
+plot(hx_stats_sar, 'N')
+plot(hx_stats_sar, 'S_n')
+
+#There were not any significant P values for any plots of hx data
+
+# mobR analysis mod
+
+mod_mob <- make_mob_in(comm_mod, env, coord_names=c("Y","X"))
+
+mod_mob
+
+#Fire frequency and measures of diversity, mod
+mod_stats_ff <- get_mob_stats(mod_mob, group_var = "ff_00_17")
+plot(mod_stats_ff, 'S')
+plot(mod_stats_ff, 'N')
+plot(mod_stats_ff, 'S_n')
+
+#Year since burn and diversity, mod
+mod_stats_ysb <- get_mob_stats(mod_mob, group_var = "YSB_17")
+plot(mod_stats_ysb, 'S')
+plot(mod_stats_ysb, 'N')
+plot(mod_stats_ysb, 'S_n')
+
+#TDS had the greatest effect in the PCA for modern data 
+mod_stats_tds <- get_mob_stats(mod_mob, group_var = "X2018TDS..ppm...tot..dissolved.solid")
+plot(mod_stats_tds, 'S')
+plot(mod_stats_tds, 'N')
+plot(mod_stats_tds, 'S_n')
+
+#P value for TDS on the alpha value of species richness was <.05
+
+#Combined data sets
+both_mob <- make_mob_in(comm_both, env, coord_names=c("Y","X"))
+
+both_mob
+
+#Fire frequency and measures of diversity, both
+both_stats_ff <- get_mob_stats(both_mob, group_var = colSums("ff_91_00" + "ff_00_17"))
+plot(both_stats_ff, 'S')
+plot(both_stats_ff, 'N')
+plot(both_stats_ff, 'S_n')
+
+#Year since burn and diversity, both
+both_stats_ysb <- get_mob_stats(both_mob, group_var = "YSB_17")
+plot(both_stats_ysb, 'S')
+plot(both_stats_ysb, 'N')
+plot(both_stats_ysb, 'S_n')
