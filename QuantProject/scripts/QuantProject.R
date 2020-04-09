@@ -268,26 +268,45 @@ comm_mantel_both
 #greater than what would be expected, so it is still a weak correlation.
 
 # mobR analysis hx
+
    hx_mob <- make_mob_in(comm_hx, env, coord_names=c("Y","X"))
 hx_mob
 
+
 #Fire frequency and measures of diversity, hx
+
+plot_rarefaction(hx_mob, "ff_91_00", 'indiv')
+plot_rarefaction(hx_mob, "ff_91_00", 'samp')
+
 hx_stats_ff <- get_mob_stats(hx_mob, group_var = "ff_91_00")
 plot(hx_stats_ff, 'S')
 plot(hx_stats_ff, 'N')
 plot(hx_stats_ff, 'S_n')
 
+
+hx_delta_ff <- get_delta_stats(hx_mob, group_var = "ff_91_00", type = 'continuous')
+
 #Year since burn and diversity, hx
+plot_rarefaction(hx_mob, "YSB_00", 'indiv')
+plot_rarefaction(hx_mob, "YSB_00", 'samp')
+
 hx_stats_ysb <- get_mob_stats(hx_mob, group_var = "YSB_00")
 plot(hx_stats_ysb, 'S')
 plot(hx_stats_ysb, 'N')
 plot(hx_stats_ysb, 'S_n')
 
+hx_delta_ysb <- get_delta_stats(hx_mob, group_var = "YSB_00", type = 'continuous')
+
 #SAR had the greatest effect in the PCA for hx data 
+plot_rarefaction(hx_mob, "SAR", 'indiv')
+plot_rarefaction(hx_mob, "SAR", 'samp')
+
 hx_stats_sar <- get_mob_stats(hx_mob, group_var = "SAR")
 plot(hx_stats_sar, 'S')
 plot(hx_stats_sar, 'N')
 plot(hx_stats_sar, 'S_n')
+
+hx_delta_sar <- get_delta_stats(hx_mob, group_var = "SAR")
 
 #There were not any significant P values for any plots of hx data
 
@@ -298,18 +317,36 @@ mod_mob <- make_mob_in(comm_mod, env, coord_names=c("Y","X"))
 mod_mob
 
 #Fire frequency and measures of diversity, mod
+
+plot_rarefaction(mod_mob, "ff_00_17", 'indiv')
+plot_rarefaction(mod_mob, "ff_00_17", 'samp')
+
+
 mod_stats_ff <- get_mob_stats(mod_mob, group_var = "ff_00_17")
 plot(mod_stats_ff, 'S')
 plot(mod_stats_ff, 'N')
 plot(mod_stats_ff, 'S_n')
 
+mod_delta_ff <- get_delta_stats(mod_mob, group_var = "ff_00_17", n_perm=200)
+
+
 #Year since burn and diversity, mod
+
+plot_rarefaction(mod_mob, "YSB_17", 'indiv')
+plot_rarefaction(mod_mob, "YSB_17", 'samp')
+
 mod_stats_ysb <- get_mob_stats(mod_mob, group_var = "YSB_17")
 plot(mod_stats_ysb, 'S')
 plot(mod_stats_ysb, 'N')
 plot(mod_stats_ysb, 'S_n')
 
-#TDS had the greatest effect in the PCA for modern data 
+mod_delta_ysb <- get_delta_stats(mod_mob, group_var = "YSB_17", n_perm=200)
+
+#TDS had the greatest effect in the PCA for modern data
+
+plot_rarefaction(mod_mob, "X2018TDS..ppm...tot..dissolved.solid", 'indiv')
+plot_rarefaction(mod_mob, "X2018TDS..ppm...tot..dissolved.solid", 'samp')
+
 mod_stats_tds <- get_mob_stats(mod_mob, group_var = "X2018TDS..ppm...tot..dissolved.solid")
 plot(mod_stats_tds, 'S')
 plot(mod_stats_tds, 'N')
@@ -317,19 +354,30 @@ plot(mod_stats_tds, 'S_n')
 
 #P value for TDS on the alpha value of species richness was <.05
 
+##I'm still trying to get the delta stats function to work. Any suggestions would be welcome!
+
 #Combined data sets
+
+env$ff_all <- env$ff_00_17 + env$ff_91_00
 both_mob <- make_mob_in(comm_both, env, coord_names=c("Y","X"))
 
 both_mob
 
+
 #Fire frequency and measures of diversity, both
-both_stats_ff <- get_mob_stats(both_mob, group_var = colSums("ff_91_00" + "ff_00_17"))
+
+both_stats_ff <- get_mob_stats(both_mob, group_var = "ff_all")
 plot(both_stats_ff, 'S')
 plot(both_stats_ff, 'N')
 plot(both_stats_ff, 'S_n')
+
+both_delta_ff <- get_delta_stats(both_mob, group_var = "ff_all", n_perm=200)
+
 
 #Year since burn and diversity, both
 both_stats_ysb <- get_mob_stats(both_mob, group_var = "YSB_17")
 plot(both_stats_ysb, 'S')
 plot(both_stats_ysb, 'N')
 plot(both_stats_ysb, 'S_n')
+
+both_delta_ysb <- get_delta_stats(both_mob, group_var = "YSB_17", n_perm=200)
