@@ -5,11 +5,11 @@ library(vegan)
 install.packages('devtools')
 library(devtools)
 install.packages(c('bindrcpp','glue','pkgconfig','tibble','plyr','dplyr'))
-library(dplyr)
 devtools::install_dev("remotes")
 remotes::install_github('MoBiodiv/mobr')
 library(readr)
 library(dplyr)
+library(mobr)
 
 #Upload data for amphibian research
 env <- read.csv('./data/Master_env_file.csv')
@@ -27,10 +27,15 @@ class(env)
 
 #Select water chemistry values for PCA analysis
 water_hx <- env %>%
-    select(Pond, pH..Clemson.extension.3.7.00., PO4.P..ppm., K..ppm., Ca..ppm., Mg..ppm., Na..ppm., Cl..ppm., B..ppm., SO4..S..ppm., NO3.N..ppm., TDS..ppm...tot..dissolved.solid,EC..MMHOS.CM...electric.conduct, HCO3..MEQ.L., CO3..MEQ.L., SAR) 
+    select(Pond, pH..Clemson.extension.3.7.00., PO4.P..ppm., K..ppm., Ca..ppm., Mg..ppm., Na..ppm., Cl..ppm., B..ppm.,
+           SO4..S..ppm., NO3.N..ppm., TDS..ppm...tot..dissolved.solid,EC..MMHOS.CM...electric.conduct, HCO3..MEQ.L.,
+           CO3..MEQ.L., SAR) 
   
 water_mod <- env %>% 
-    select (Pond, X2018pH.clemson., X2018PO4.P..ppm., X2018K..ppm., X2018Ca..ppm., X2018Mg..ppm., X2018Na..ppm., X2018Cl..ppm., X2018B..ppm., X2018SO4..S..ppm., X2018NO3.N..ppm., X2018TDS..ppm...tot..dissolved.solid, X2018EC..MMHOS.CM...electric.conduct, X2018HCO3..MEQ.L., X2018CO3..MEQ.L., X2018SAR, X2018Zn, X2018Cu, X2018Mn, X2018RSC) 
+    select (Pond, X2018pH.clemson., X2018PO4.P..ppm., X2018K..ppm., X2018Ca..ppm., X2018Mg..ppm., X2018Na..ppm., X2018Cl..ppm.,
+            X2018B..ppm., X2018SO4..S..ppm., X2018NO3.N..ppm., X2018TDS..ppm...tot..dissolved.solid,
+            X2018EC..MMHOS.CM...electric.conduct, X2018HCO3..MEQ.L., X2018CO3..MEQ.L., X2018SAR, X2018Zn, X2018Cu,
+            X2018Mn, X2018RSC) 
 
 #PCA analysis - historic
 PCA_hx <- rda(water_hx, scale=TRUE)
@@ -43,7 +48,7 @@ round(PCA_hx$CA$eig / PCA_hx$tot.chi, 2)
 plot(PCA_hx)
 biplot(PCA_hx)
 
-PCA_hx$CA$eig
+PCA_hx$CA$eig)
 scores(PCA_hx)
 
 round(PCA_hx$CA$eig/sum(PCA_hx$CA$eig),2)
@@ -105,7 +110,7 @@ for (i in 2:nperm) {
     # shuffle the rows of the spatial coordinates
     tmp_xy_hx = env_xy[sample(nrow(env_xy)), ]
     # correlation between the shuffled spatial coordinates and sr_dist
-    null_cor[i] = cor(dist(tmp_xy_hx), sr_dist_hx)
+    null_cor_hx[i] = cor(dist(tmp_xy_hx), sr_dist_hx)
 }
 # compute the p-value
 sum(null_cor_hx >= obs_cor_hx) / nperm
@@ -115,11 +120,14 @@ sr_mantel_hx = mantel(xy_dist_hx, sr_dist_hx)
 
 sr_mantel_hx
 
+#P value = 0.016
 
 # compare the two approaches graphically using stacked boxplots
 boxplot(list(null_cor_hx, sr_mantel_hx$perm), horizontal = T, boxwex = 0.5,
         names = c('mine', 'theirs'), xlab='Correlation')
 abline(v=obs_cor_hx, col='red')
+
+#Box plots very similar
 
 ## compute bray curtis distance for the community matrix
 comm_dist_hx = vegdist(comm_hx)
@@ -133,7 +141,7 @@ abline(v = max_dist_hx, col='red', lwd=3, lty=2)
 comm_mantel_hx = mantel(xy_dist_hx, comm_dist_hx)
 comm_mantel_hx
 
-
+#Bray curtis p value = 0.07, mantel significance = 0.2221
 
 #Spatial analysis mod
 env_xy <- env %>% select(X, Y)
@@ -175,7 +183,7 @@ for (i in 2:nperm) {
 # compute the p-value
 sum(null_cor_mod >= obs_cor_mod) / nperm
 
-#mantel hx
+#mantel mod
 sr_mantel_mod = mantel(xy_dist_mod, sr_dist_mod)
 
 sr_mantel_mod
@@ -227,7 +235,7 @@ abline(lm(sr_dist_both ~ xy_dist_both), lwd=3, col='red')
 lines(lowess(xy_dist_both, sr_dist_both), lwd=3, col='pink')
 abline(v = max_dist_both, col='red', lwd=3, lty=2)
 
-#correlation hx
+#correlation both
 obs_cor_both = cor(xy_dist_both, sr_dist_both)
 obs_cor_both
 # carry out a permutation test for significance:
@@ -308,7 +316,7 @@ plot(hx_stats_sar, 'S_n')
 
 hx_delta_sar <- get_delta_stats(hx_mob, group_var = "SAR")
 
-#There were not any significant P values for any plots of hx data
+#There were not any significant P values for any plots of hx data based on the stats produced with the graphs
 
 # mobR analysis mod
 
@@ -366,6 +374,7 @@ both_mob
 
 #Fire frequency and measures of diversity, both
 
+
 both_stats_ff <- get_mob_stats(both_mob, group_var = "ff_all")
 plot(both_stats_ff, 'S')
 plot(both_stats_ff, 'N')
@@ -381,3 +390,5 @@ plot(both_stats_ysb, 'N')
 plot(both_stats_ysb, 'S_n')
 
 both_delta_ysb <- get_delta_stats(both_mob, group_var = "YSB_17", n_perm=200)
+
+##No significance in any mob stats. Unable to get delta stats to run. Some rarefaction curves show interesting trends
